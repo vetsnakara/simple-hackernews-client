@@ -1,5 +1,6 @@
 import React from "react";
 
+import Button from "./components/Button";
 import Search from "./components/Search";
 import Table from "./components/Table";
 
@@ -8,27 +9,46 @@ import { url, DEFAULT_QUERY } from "./constants";
 import "./App.css";
 
 class App extends React.Component {
-  state = { result: null, searchTerm: DEFAULT_QUERY };
+  state = { result: null, searchTerm: "", searchKey: DEFAULT_QUERY };
 
   componentDidMount() {
-    const { searchTerm } = this.state;
-    this.fetchSearchTopStories(searchTerm);
+    const { searchKey } = this.state;
+    this.fetchStories(searchKey);
   }
 
-  setSearchTopStories = result => this.setState({ result });
-
-  fetchSearchTopStories = searchTerm => {
-    const searchUrl = `${url}${searchTerm}`;
+  fetchStories = (searchTerm, page) => {
+    const searchUrl = url(searchTerm, page);
 
     fetch(searchUrl)
       .then(response => response.json())
-      .then(result => this.setSearchTopStories(result))
+      .then(result => this.setSearchResult(result))
       .catch(error => console.log(error));
   };
 
-  onSearchSubmit = () => {
+  handleNewSearch = () => {
     const { searchTerm } = this.state;
-    this.fetchSearchTopStories(searchTerm);
+    this.setState({ searchKey: searchTerm });
+    this.fetchStories(searchTerm);
+  };
+
+  handleNextSearch = () => {
+    const {
+      searchKey,
+      result: { page }
+    } = this.state;
+    this.fetchStories(searchKey, page + 1);
+  };
+
+  setSearchResult = ({ hits: newHits, page }) => {
+    const { result } = this.state;
+
+    const oldHits = (result && result.hits) || [];
+
+    const updatedHits = [...oldHits, ...newHits];
+
+    this.setState({
+      result: { hits: updatedHits, page }
+    });
   };
 
   onDismiss = id => {
@@ -50,17 +70,22 @@ class App extends React.Component {
           <Search
             value={searchTerm}
             onChange={this.onSearchChange}
-            onSubmit={this.onSearchSubmit}
+            onSubmit={() => this.handleNewSearch()}
           >
             Search
           </Search>
         </div>
         {result && (
-          <Table
-            list={result.hits}
-            pattern={searchTerm}
-            onDismiss={this.onDismiss}
-          />
+          <React.Fragment>
+            <Table
+              list={result.hits}
+              pattern={searchTerm}
+              onDismiss={this.onDismiss}
+            />
+            <div className="interactions">
+              <Button onClick={this.handleNextSearch}>More</Button>
+            </div>
+          </React.Fragment>
         )}
       </div>
     );
