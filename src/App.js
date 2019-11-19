@@ -12,16 +12,24 @@ class App extends React.Component {
 
   componentDidMount() {
     const { searchTerm } = this.state;
+    this.fetchSearchTopStories(searchTerm);
+  }
 
+  setSearchTopStories = result => this.setState({ result });
+
+  fetchSearchTopStories = searchTerm => {
     const searchUrl = `${url}${searchTerm}`;
 
     fetch(searchUrl)
       .then(response => response.json())
       .then(result => this.setSearchTopStories(result))
       .catch(error => console.log(error));
-  }
+  };
 
-  setSearchTopStories = result => this.setState({ result });
+  onSearchSubmit = () => {
+    const { searchTerm } = this.state;
+    this.fetchSearchTopStories(searchTerm);
+  };
 
   onDismiss = id => {
     const isNotID = item => item.objectID !== id;
@@ -39,7 +47,11 @@ class App extends React.Component {
     return (
       <div className="page">
         <div className="interactions">
-          <Search value={searchTerm} onChange={this.onSearchChange}>
+          <Search
+            value={searchTerm}
+            onChange={this.onSearchChange}
+            onSubmit={this.onSearchSubmit}
+          >
             Search
           </Search>
         </div>
