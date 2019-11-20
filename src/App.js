@@ -19,7 +19,7 @@ import { isSearched } from "./helpers";
 import "./App.css";
 
 class App extends React.Component {
-  state = { results: {}, searchTerm: "", searchKey: "" };
+  state = { results: {}, searchTerm: "", searchKey: "", error: null };
 
   fetchStories = (searchKey, page) => {
     const searchUrl = url(searchKey, page);
@@ -27,7 +27,9 @@ class App extends React.Component {
     fetch(searchUrl)
       .then(response => response.json())
       .then(result => this.setSearchResult(searchKey, result))
-      .catch(error => console.log(error));
+      .catch(error => {
+        this.setState({ error });
+      });
   };
 
   handleNewSearch = () => {
@@ -71,7 +73,8 @@ class App extends React.Component {
         results: {
           ...state.results,
           [searchKey]: { hits: updatedHits, page }
-        }
+        },
+        error: null
       };
     });
 
@@ -92,7 +95,8 @@ class App extends React.Component {
   };
 
   render() {
-    const { searchKey, searchTerm } = this.state;
+    const { searchKey, searchTerm, error } = this.state;
+
     const hits = this.getFilteredHits();
 
     return (
@@ -105,6 +109,9 @@ class App extends React.Component {
           >
             Search
           </Search>
+        </div>
+        <div className="interactions">
+          {error && <p>Something went wrong ...</p>}
         </div>
         {hits.length > 0 && (
           <React.Fragment>
