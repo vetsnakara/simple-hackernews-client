@@ -8,7 +8,7 @@ const Search = ({ children, onSubmit, ...rest }) => {
 
   return (
     <form onSubmit={handleSubmit}>
-      <input type="text" {...rest} autoFocus />
+      <input type="text" {...rest} autoFocus placeholder="Search ..." />
       <button type="submit">{children}</button>
     </form>
   );

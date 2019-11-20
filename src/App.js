@@ -13,18 +13,13 @@ import Button from "./components/Button";
 import Search from "./components/Search";
 import Table from "./components/Table";
 
-import { url, DEFAULT_QUERY } from "./constants";
+import { url } from "./constants";
 import { isSearched } from "./helpers";
 
 import "./App.css";
 
 class App extends React.Component {
-  state = { results: null, searchTerm: "", searchKey: DEFAULT_QUERY };
-
-  componentDidMount() {
-    const { searchKey } = this.state;
-    this.fetchStories(searchKey);
-  }
+  state = { results: {}, searchTerm: "", searchKey: "" };
 
   fetchStories = (searchKey, page) => {
     const searchUrl = url(searchKey, page);
@@ -37,13 +32,16 @@ class App extends React.Component {
 
   handleNewSearch = () => {
     const { searchTerm, results } = this.state;
+
+    if (!searchTerm) return;
+
     const isTermSearched = searchTerm in results;
+
+    this.setState({ searchKey: searchTerm, searchTerm: "" });
 
     if (!isTermSearched) {
       this.fetchStories(searchTerm);
     }
-
-    this.setState({ searchKey: searchTerm });
   };
 
   handleNextSearch = () => {
@@ -62,7 +60,7 @@ class App extends React.Component {
       const { results } = state;
       const { hits: newHits, page } = result;
 
-      const isKeySearched = results && searchKey in results;
+      const isKeySearched = searchKey in results;
 
       const oldHits = isKeySearched ? results[searchKey].hits : [];
 
@@ -89,8 +87,7 @@ class App extends React.Component {
 
   getFilteredHits = () => {
     const { results, searchKey, searchTerm } = this.state;
-    const hits =
-      (results && results[searchKey] && results[searchKey].hits) || [];
+    const hits = (results[searchKey] && results[searchKey].hits) || [];
     return hits.filter(isSearched(searchTerm));
   };
 
