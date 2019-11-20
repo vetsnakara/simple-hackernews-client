@@ -42,7 +42,7 @@ class App extends React.Component {
   setSearchResult = ({ hits: newHits, page }) => {
     const { result } = this.state;
 
-    const oldHits = (result && result.hits) || [];
+    const oldHits = page > 0 ? result.hits : [];
 
     const updatedHits = [...oldHits, ...newHits];
 
@@ -62,7 +62,7 @@ class App extends React.Component {
     this.setState({ searchTerm: value });
 
   render() {
-    const { result, searchTerm } = this.state;
+    const { result, searchTerm, searchKey } = this.state;
 
     return (
       <div className="page">
@@ -77,13 +77,18 @@ class App extends React.Component {
         </div>
         {result && (
           <React.Fragment>
+            <p>
+              Search results: {searchKey} ({result.hits.length})
+            </p>
             <Table
               list={result.hits}
               pattern={searchTerm}
               onDismiss={this.onDismiss}
             />
             <div className="interactions">
-              <Button onClick={this.handleNextSearch}>More</Button>
+              <Button onClick={this.handleNextSearch}>
+                More on {`'${searchKey}'`}
+              </Button>
             </div>
           </React.Fragment>
         )}
