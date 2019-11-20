@@ -14,7 +14,7 @@ import Search from "./components/Search";
 import Table from "./components/Table";
 
 import { url } from "./constants";
-import { isSearched } from "./helpers";
+import { isSearched, filterHitsWithNull } from "./helpers";
 
 import "./App.css";
 
@@ -27,9 +27,7 @@ class App extends React.Component {
     fetch(searchUrl)
       .then(response => response.json())
       .then(result => this.setSearchResult(searchKey, result))
-      .catch(error => {
-        this.setState({ error });
-      });
+      .catch(error => this.setState({ error }));
   };
 
   handleNewSearch = () => {
@@ -66,7 +64,7 @@ class App extends React.Component {
 
       const oldHits = isKeySearched ? results[searchKey].hits : [];
 
-      const updatedHits = [...oldHits, ...newHits];
+      const updatedHits = [...oldHits, ...filterHitsWithNull(newHits)];
 
       return {
         ...state,
@@ -90,8 +88,8 @@ class App extends React.Component {
 
   getFilteredHits = () => {
     const { results, searchKey, searchTerm } = this.state;
-    const hits = (results[searchKey] && results[searchKey].hits) || [];
-    return hits.filter(isSearched(searchTerm));
+    const hits = results[searchKey] && results[searchKey].hits;
+    return hits ? hits.filter(isSearched(searchTerm)) : null;
   };
 
   render() {
@@ -113,17 +111,19 @@ class App extends React.Component {
         <div className="interactions">
           {error && <p>Something went wrong ...</p>}
         </div>
-        {hits.length > 0 && (
+        {hits && (
           <React.Fragment>
             <p>
               Search results: {searchKey} ({hits.length})
             </p>
             <Table list={hits} onDismiss={this.onDismiss} />
-            <div className="interactions">
-              <Button onClick={this.handleNextSearch}>
-                More on {`'${searchKey}'`}
-              </Button>
-            </div>
+            {hits.length > 0 && (
+              <div className="interactions">
+                <Button onClick={this.handleNextSearch}>
+                  More on {`'${searchKey}'`}
+                </Button>
+              </div>
+            )}
           </React.Fragment>
         )}
       </div>
