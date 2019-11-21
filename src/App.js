@@ -1,19 +1,13 @@
-// новый поиск
-//  1. setState({searchKey: searchTerm})
-//  2. searchTerm in results
-//     2.1 Нет:
-//         - fetchResults(searchTerm)
-// продолжение поиска
-//  1. page = this.state.results[searchKey].page
-//  2.fetchResults(searchKey, page + 1)
+// TODO: dismiss not working
 
 import React from "react";
+
+import { getHits } from "./services/hitsService";
 
 import Button from "./components/Button";
 import Search from "./components/Search";
 import Table from "./components/Table";
 
-import { url } from "./constants";
 import { isSearched, filterHitsWithNull } from "./helpers";
 
 import "./App.css";
@@ -21,13 +15,13 @@ import "./App.css";
 class App extends React.Component {
   state = { results: {}, searchTerm: "", searchKey: "", error: null };
 
-  fetchStories = (searchKey, page) => {
-    const searchUrl = url(searchKey, page);
-
-    fetch(searchUrl)
-      .then(response => response.json())
-      .then(result => this.setSearchResult(searchKey, result))
-      .catch(error => this.setState({ error }));
+  fetchHits = async (searchKey, page) => {
+    try {
+      const result = await getHits(searchKey, page);
+      this.setSearchResult(searchKey, result);
+    } catch (error) {
+      this.setState({ error });
+    }
   };
 
   handleNewSearch = () => {
@@ -40,7 +34,7 @@ class App extends React.Component {
     this.setState({ searchKey: searchTerm, searchTerm: "" });
 
     if (!isTermSearched) {
-      this.fetchStories(searchTerm);
+      this.fetchHits(searchTerm);
     }
   };
 
@@ -52,7 +46,7 @@ class App extends React.Component {
       }
     } = this.state;
 
-    this.fetchStories(searchKey, page + 1);
+    this.fetchHits(searchKey, page + 1);
   };
 
   setSearchResult = (searchKey, result) =>
