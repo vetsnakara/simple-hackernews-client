@@ -5,13 +5,20 @@ import { getHits } from "./services/hitsService";
 import Button from "./components/Button";
 import Search from "./components/Search";
 import Table from "./components/Table";
+import WithLoading from "./components/WithLoading";
 
 import { isSearched, filterHitsWithNull } from "./helpers";
 
 import "./App.css";
 
 class App extends React.Component {
-  state = { results: {}, searchTerm: "", searchKey: "", error: null };
+  state = {
+    results: {},
+    searchTerm: "",
+    searchKey: "",
+    error: null,
+    isLoading: false
+  };
 
   fetchHits = async (searchKey, page) => {
     try {
@@ -32,6 +39,7 @@ class App extends React.Component {
     this.setState({ searchKey: searchTerm, searchTerm: "" });
 
     if (!isTermSearched) {
+      this.setState({ isLoading: true });
       this.fetchHits(searchTerm);
     }
   };
@@ -43,6 +51,8 @@ class App extends React.Component {
         [searchKey]: { page }
       }
     } = this.state;
+
+    this.setState({ isLoading: true });
 
     this.fetchHits(searchKey, page + 1);
   };
@@ -64,7 +74,8 @@ class App extends React.Component {
           ...state.results,
           [searchKey]: { hits: updatedHits, page }
         },
-        error: null
+        error: null,
+        isLoading: false
       };
     });
 
@@ -102,7 +113,7 @@ class App extends React.Component {
   };
 
   render() {
-    const { searchKey, searchTerm, error } = this.state;
+    const { searchKey, searchTerm, error, isLoading } = this.state;
 
     const hits = this.getFilteredHits();
 
@@ -113,6 +124,7 @@ class App extends React.Component {
             value={searchTerm}
             onChange={this.onSearchChange}
             onSubmit={() => this.handleNewSearch()}
+            isLoading={isLoading}
           />
         </div>
         <div className="interactions">
@@ -126,9 +138,11 @@ class App extends React.Component {
             <Table list={hits} onDismiss={this.handleDismiss} />
             {hits.length > 0 && (
               <div className="interactions">
-                <Button onClick={this.handleNextSearch}>
-                  More on {`'${searchKey}'`}
-                </Button>
+                <WithLoading isLoading={isLoading}>
+                  <Button onClick={this.handleNextSearch}>
+                    More on {`'${searchKey}'`}
+                  </Button>
+                </WithLoading>
               </div>
             )}
           </React.Fragment>

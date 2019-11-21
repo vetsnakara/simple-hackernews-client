@@ -1,13 +1,19 @@
 import React from "react";
 import PropTypes from "prop-types";
 
+import Button from "./LoadingButton";
+
 class Search extends React.Component {
   static propTypes = {
-    children: PropTypes.node,
-    onSubmit: PropTypes.func.isRequired
+    value: PropTypes.string.isRequired,
+    onSubmit: PropTypes.func.isRequired,
+    onChange: PropTypes.func.isRequired,
+    isLoading: PropTypes.bool,
+    children: PropTypes.node
   };
 
   static defaultProps = {
+    isLoading: false,
     children: "Search"
   };
 
@@ -18,7 +24,7 @@ class Search extends React.Component {
   }
 
   render() {
-    const { children, onSubmit, ...rest } = this.props;
+    const { value, onSubmit, onChange, isLoading, children } = this.props;
 
     const handleSubmit = e => {
       e.preventDefault();
@@ -29,12 +35,15 @@ class Search extends React.Component {
       <form onSubmit={handleSubmit}>
         <input
           type="text"
-          {...rest}
+          value={value}
+          onChange={onChange}
           autoFocus
           placeholder="Search ..."
           ref={this.input}
         />
-        <button type="submit">{children}</button>
+        <Button type="submit" isLoading={isLoading}>
+          {children}
+        </Button>
       </form>
     );
   }
