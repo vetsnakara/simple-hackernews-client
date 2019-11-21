@@ -1,5 +1,3 @@
-// TODO: dismiss not working
-
 import React from "react";
 
 import { getHits } from "./services/hitsService";
@@ -70,21 +68,6 @@ class App extends React.Component {
       };
     });
 
-  // state = {
-  //   results: {
-  //     react: {
-  //       hits,
-  //       page
-  //     },
-  //     php: {
-  //       hits,
-  //       page
-  //     }
-  //   },
-  //   searchKey,
-  //   error
-  // }
-
   handleDismiss = id => {
     const isNotID = item => item.objectID !== id;
 
@@ -130,9 +113,7 @@ class App extends React.Component {
             value={searchTerm}
             onChange={this.onSearchChange}
             onSubmit={() => this.handleNewSearch()}
-          >
-            Search
-          </Search>
+          />
         </div>
         <div className="interactions">
           {error && <p>Something went wrong ...</p>}

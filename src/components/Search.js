@@ -1,6 +1,16 @@
 import React from "react";
+import PropTypes from "prop-types";
 
 class Search extends React.Component {
+  static propTypes = {
+    children: PropTypes.node,
+    onSubmit: PropTypes.func.isRequired
+  };
+
+  static defaultProps = {
+    children: "Search"
+  };
+
   input = React.createRef();
 
   componentDidMount() {
