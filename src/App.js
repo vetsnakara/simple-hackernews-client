@@ -70,11 +70,43 @@ class App extends React.Component {
       };
     });
 
-  onDismiss = id => {
+  // state = {
+  //   results: {
+  //     react: {
+  //       hits,
+  //       page
+  //     },
+  //     php: {
+  //       hits,
+  //       page
+  //     }
+  //   },
+  //   searchKey,
+  //   error
+  // }
+
+  handleDismiss = id => {
     const isNotID = item => item.objectID !== id;
-    this.setState(({ result }) => ({
-      result: { ...result, hits: result.hits.filter(isNotID) }
-    }));
+
+    this.setState(state => {
+      const { results, searchKey } = state;
+      const { hits } = results[searchKey];
+
+      const updResult = {
+        ...results[searchKey],
+        hits: hits.filter(isNotID)
+      };
+
+      const updatedResults = {
+        ...results,
+        [searchKey]: updResult
+      };
+
+      return {
+        ...state,
+        results: updatedResults
+      };
+    });
   };
 
   onSearchChange = ({ target: { value } }) =>
@@ -110,7 +142,7 @@ class App extends React.Component {
             <p>
               Search results: {searchKey} ({hits.length})
             </p>
-            <Table list={hits} onDismiss={this.onDismiss} />
+            <Table list={hits} onDismiss={this.handleDismiss} />
             {hits.length > 0 && (
               <div className="interactions">
                 <Button onClick={this.handleNextSearch}>
