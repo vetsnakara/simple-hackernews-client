@@ -10,14 +10,10 @@ import {
 export const isSearched = searchTerm => item =>
   item.title.toLowerCase().includes(searchTerm.toLowerCase());
 
-export const filterHitsWithNull = items =>
-  items.filter(item => {
+export const getValidHits = hits =>
+  hits.filter(hit => {
     const hasNull =
-      !item.title ||
-      !item.url ||
-      !item.author ||
-      !item.num_comments ||
-      !item.points;
+      !hit.title || !hit.url || !hit.author || !hit.num_comments || !hit.points;
 
     return !hasNull;
   });

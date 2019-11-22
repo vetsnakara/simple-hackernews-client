@@ -7,7 +7,8 @@
 }
 
 .table {
-  margin: 20px 0;
+  width: 100%;
+  /* margin: 20px 0; */
 }
 
 .table-header {
@@ -18,12 +19,6 @@
   justify-content: space-between;
 }
 
-.table-empty {
-  margin: 200px;
-  text-align: center;
-  font-size: 16px;
-}
-
 .table-row {
   display: flex;
   line-height: 24px;
@@ -32,6 +27,13 @@
   padding: 10px;
   background: #ffffff;
   border: 1px solid #e3e3e3;
+  text-align: left;
+}
+
+.table-cell {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
 }
 
 .table-header > span {

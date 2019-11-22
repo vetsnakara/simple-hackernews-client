@@ -1,4 +1,8 @@
+// todo: refactor
+// todo: add search no results
+
 import React from "react";
+import _ from "lodash";
 
 import { getHits } from "./services/hitsService";
 
@@ -7,7 +11,7 @@ import Search from "./components/Search";
 import Table from "./components/Table";
 import WithLoading from "./components/WithLoading";
 
-import { isSearched, filterHitsWithNull } from "./helpers";
+import { isSearched, getValidHits } from "./helpers";
 
 import "./App.css";
 
@@ -17,8 +21,49 @@ class App extends React.Component {
     searchTerm: "",
     searchKey: "",
     error: null,
-    isLoading: false
+    isLoading: false,
+    sortColumn: { path: "title", order: "asc" }
   };
+
+  columns = [
+    {
+      label: "Title",
+      path: "title",
+      content: item => (
+        <a href={item.url} target="blank">
+          {item.title}
+        </a>
+      ),
+      width: "40%"
+    },
+    {
+      label: "Author",
+      path: "author",
+      width: "30%"
+    },
+    {
+      label: "Comments",
+      path: "num_comments",
+      width: "10%"
+    },
+    {
+      label: "Points",
+      path: "points",
+      width: "10%"
+    },
+    {
+      key: "dismiss",
+      content: item => (
+        <Button
+          onClick={() => this.handleDismiss(item.objectID)}
+          className="button-inline"
+        >
+          Dismiss
+        </Button>
+      ),
+      width: "10%"
+    }
+  ];
 
   fetchHits = async (searchKey, page) => {
     try {
@@ -66,7 +111,7 @@ class App extends React.Component {
 
       const oldHits = isKeySearched ? results[searchKey].hits : [];
 
-      const updatedHits = [...oldHits, ...filterHitsWithNull(newHits)];
+      const updatedHits = [...oldHits, ...getValidHits(newHits)];
 
       return {
         ...state,
@@ -106,16 +151,36 @@ class App extends React.Component {
   onSearchChange = ({ target: { value } }) =>
     this.setState({ searchTerm: value });
 
-  getFilteredHits = () => {
-    const { results, searchKey, searchTerm } = this.state;
-    const hits = results[searchKey] && results[searchKey].hits;
-    return hits ? hits.filter(isSearched(searchTerm)) : null;
+  handleSort = sortColumn => this.setState({ sortColumn });
+
+  getHits = () => {
+    const { results, searchKey, searchTerm, sortColumn } = this.state;
+
+    const hits = (results[searchKey] && results[searchKey].hits) || [];
+
+    const sortedHits = this.sortItems(hits, sortColumn);
+
+    const searchedHits = this.getSearchedItems(sortedHits, searchTerm);
+
+    return searchedHits;
   };
 
-  render() {
-    const { searchKey, searchTerm, error, isLoading } = this.state;
+  sortItems = (items, sortColumn) => {
+    // todo: helper
+    const { path, order } = sortColumn;
+    const sorted = _.orderBy(items, [path], [order]);
+    return sorted;
+  };
 
-    const hits = this.getFilteredHits();
+  getSearchedItems(items, searchTerm) {
+    // todo: helper
+    return items.filter(isSearched(searchTerm));
+  }
+
+  render() {
+    const { searchKey, searchTerm, error, isLoading, sortColumn } = this.state;
+
+    const hits = this.getHits();
 
     return (
       <div className="page">
@@ -127,15 +192,25 @@ class App extends React.Component {
             isLoading={isLoading}
           />
         </div>
-        <div className="interactions">
-          {error && <p>Something went wrong ...</p>}
-        </div>
-        {hits && (
+
+        {error && (
+          <div className="interactions">
+            <p>Something went wrong ...</p>
+          </div>
+        )}
+
+        {hits.length > 0 && (
           <React.Fragment>
             <p>
               Search results: {searchKey} ({hits.length})
             </p>
-            <Table list={hits} onDismiss={this.handleDismiss} />
+            <Table
+              columns={this.columns}
+              items={hits}
+              onSort={this.handleSort}
+              sortColumn={sortColumn}
+            />
+
             {hits.length > 0 && (
               <div className="interactions">
                 <WithLoading isLoading={isLoading}>
