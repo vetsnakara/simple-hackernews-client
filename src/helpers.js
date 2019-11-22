@@ -7,8 +7,12 @@ import {
   DEFAULT_HPP
 } from "./constants";
 
-export const isSearched = searchTerm => item =>
-  item.title.toLowerCase().includes(searchTerm.toLowerCase());
+export const isSearched = searchTerm => ({ title, author }) =>
+  [title, author].reduce(
+    (result, field) =>
+      result || field.toLowerCase().includes(searchTerm.toLowerCase()),
+    false
+  );
 
 export const getValidHits = hits =>
   hits.filter(hit => {
